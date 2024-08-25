@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test</title>
+	<style type="text/css">
+		@import url(http://fonts.googleapis.com/css?family=Montserrat:400,700);
+		@import url(http://fonts.googleapis.com/css?family=Spinnaker);
+
+		body {
+			width: 300px;
+			overflow-x: hidden;
+			background: #fbfbfb;
+			font-size: 14px;
+		}
+		
+		div#logged {
+			display: block;
+			position: relative;
+			font-family: Spinnaker;
+			background: #cde;
+		}
+
+		span#medal-name {
+			float: left;
+			width: 250px;
+			font-family: Montserrat;
+			font-size: 18px;
+			text-transform: uppercase;
+		}
+
+		img#picto {
+			float: right;
+			width: 40px;
+			height: 40px;
+		}
+		
+		div.spacer {
+			clear: both;
+		}
+		
+		div.poi-count {
+			margin-top: 20px;
+		}
+	</style>
+  </head>
+  <body>
+	<div id="logged">
+		<div>
+			<span id="medal-name">BATTLEPOLY - CAISSE</span><img id="picto" src="http://battle.paris/static/Rewards/battlepoly_community_big.png" />
+			<div class="spacer"></div>
+		</div>
+		<div class="poi-count">
+			<span id="checked-poi-label">POI checkés :</span> <span id="checked-poi">0</span> / <span id="total-poi">0</span> (<span id="left-poi">0</span> <span id="left-poi-label">restants</span>)
+		</div>
+		<div>
+			<span id="total-checked-label">Total checkés :</span> <span id="total-checked">0</span>
+		</div>
+	</div>
+
+	<br />	
+	
+	<div id="logged">
+		<div>
+			<span id="medal-name">BATTLEPOLY - CAISSE DE COMMUNAUTÉ</span><img id="picto" src="http://battle.paris/static/Rewards/battlepoly_community_big.png" />
+			<div class="spacer"></div>
+		</div>
+		<div class="poi-count">
+			<span id="checked-poi-label">POI checkés :</span> <span id="checked-poi">0</span> / <span id="total-poi">0</span> (<span id="left-poi">0</span> <span id="left-poi-label">restants</span>)
+		</div>
+		<div>
+			<span id="total-checked-label">Total checkés :</span> <span id="total-checked">0</span>
+		</div>
+	</div>
+  </body>
+</html>

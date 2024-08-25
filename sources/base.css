@@ -1,0 +1,60 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Spinnaker);
+
+body {
+	width: 320px;
+	overflow-x: hidden;
+	font-size: 1em;
+	background: #fbfbfb;
+}
+
+div#not-logged, div#logged, div#medal-list {
+	display: none;
+	position: relative;
+	font-family: Spinnaker;
+	margin-top: 8px;
+	font-size: 1.2em;
+	line-height: 133%;
+}
+
+a {
+	position: absolute;
+}
+
+a#all-medals {
+	right: -2px;
+	bottom: -8px;
+}
+
+img.medal-link {
+	width: 48px;
+	height: 48px;
+}
+
+span#medal-name {
+	float: left;
+	font-family: Montserrat;
+	font-size: 1.3em;
+	text-transform: uppercase;
+	width: 264px;
+	line-height: 110%;
+}
+
+img#picto {
+	float: left;
+	width: 48px;
+	height: 48px;
+	margin-right: 8px;
+	margin-bottom:	8px;
+}
+		
+div.spacer {
+	clear: both;
+	border-bottom: 1px dashed #ccc;
+}
+
+div.poi-count {
+	margin-top: 8px;
+	margin-left: 2px;
+	line-height: 140%;
+}

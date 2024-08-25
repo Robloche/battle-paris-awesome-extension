@@ -1,0 +1,26 @@
+{
+    "extName": {
+        "message": "BattleParis Awesome Extension"
+    },
+    "extShortName": {
+        "message": "BattleParis++"
+    },
+    "extDescription": {
+        "message": "This extension adds useful features on some of BattleParis' pages."
+    },
+	"notLogged": {
+		"message": "You are not connected. Please log in first."
+	},
+	"checkedPoi": {
+		"message": "POI checked:"
+	},
+	"leftPoi": {
+		"message": "left"
+	},
+	"leftPois": {
+		"message": "left"
+	},
+	"totalChecked" : {
+		"message": "Total checked:"
+	}
+}
