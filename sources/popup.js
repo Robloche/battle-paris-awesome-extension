@@ -4,21 +4,25 @@ const getCurrentTabId = async () => {
     return tab?.id ?? null;
 };
 
-var battleParisEnhancer = {
-
-    linkPerRow: 10,
-    spacing: 16,
-    imageSize: 48,
+const Settings = Object.freeze({
     allMedalsSize: 13,
+    imageSize: 48,
+    linkPerRow: 10,
+    popupHeight: 488,
+    popupWidth: 624,
+    spacing: 16,
     zoom: 10,
+});
+
+const battleParisEnhancer = {
 
     checkPage: function () {
-        var obj = this;
+        const obj = this;
         chrome.tabs.query({
             active: true,
             lastFocusedWindow: true
-        }, async function (tabs) {
-            var url = tabs[0].url;
+        }, async (tabs) => {
+            const [{url}] = tabs;
             if (url.indexOf('battle.paris/medal/') > -1 || url.indexOf('battleparis.com/medal/') > -1) {
                 // Medal page
                 await obj.checkLoggedUser();
@@ -30,15 +34,14 @@ var battleParisEnhancer = {
     },
 
     displayAllMedals: function () {
-        $('body').width(624).height(488);
+        $('body').width(Settings.popupWidth).height(Settings.popupHeight);
 
-        var medalsDiv = $('#medal-list');
-        var c = 0;
-        var x = 0;
-        var y = 0;
-        var obj = this;
+        const medalsDiv = $('#medal-list');
+        let c = 0;
+        let x = 0;
+        let y = 0;
 
-        $(rewards).each(function () {
+        $(Rewards).each(function () {
             $('<img />')
                 .attr({
                     src: 'https://battle.paris/static/Rewards/' + this.image + '.png',
@@ -52,10 +55,10 @@ var battleParisEnhancer = {
                     .css('top', y)
                     .appendTo(medalsDiv));
 
-            x += obj.imageSize + obj.spacing;
-            if (++c % obj.linkPerRow === 0) {
+            x += Settings.imageSize + Settings.spacing;
+            if (++c % Settings.linkPerRow === 0) {
                 x = 0;
-                y += obj.imageSize + obj.spacing;
+                y += Settings.imageSize + Settings.spacing;
             }
         });
 
@@ -65,17 +68,17 @@ var battleParisEnhancer = {
         // Bouncing effect on medals
         $('.medal-link').hover(
             function () {
-                var size = obj.imageSize + obj.zoom;
+                const size = Settings.imageSize + Settings.zoom;
                 $(this).stop(false, true).animate({
                     'width': size,
                     'height': size,
-                    'margin': -obj.zoom / 2
+                    'margin': -Settings.zoom / 2
                 }, {duration: 200});
             },
             function () {
                 $(this).stop(false, true).animate({
-                    'width': obj.imageSize,
-                    'height': obj.imageSize,
+                    'width': Settings.imageSize,
+                    'height': Settings.imageSize,
                     'margin': 0
                 }, {duration: 300});
             }
@@ -122,17 +125,17 @@ var battleParisEnhancer = {
         $('#medal-name').text(e.name);
 
         // Bouncing effect on "all-medals" link
-        var obj = this;
+        const obj = this;
         $('#all-medals img').hover(
             function () {
-                var size = obj.allMedalsSize + 6;
-                $(this).stop(false, true).animate({'width': size, 'height': size, 'margin': -3}, {duration: 200});
+                const size = Settings.allMedalsSize + 6;
+                $(this).stop(false, true).animate({width: size, height: size, margin: -3}, {duration: 200});
             },
             function () {
                 $(this).stop(false, true).animate({
-                    'width': obj.allMedalsSize,
-                    'height': obj.allMedalsSize,
-                    'margin': 0
+                    width: Settings.allMedalsSize,
+                    height: Settings.allMedalsSize,
+                    margin: 0
                 }, {duration: 300});
             }
         );

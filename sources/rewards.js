@@ -1,4 +1,4 @@
-﻿var rewards = [
+﻿const Rewards = Object.freeze([
 	{ name: "Battlepoly - Case Départ", image: "battlepoly_start" },
 	{ name: "Battlepoly - Case Prison", image: "battlepoly_prison" },
 	{ name: "Battlepoly - Caisse de Communauté", image: "battlepoly_community" },
@@ -110,4 +110,4 @@
 	{ name: "Vétéran du Transilien N", image: "lineN_01" },
 	{ name: "Vétéran du Transilien P", image: "lineP_01" },
 	{ name: "Vétéran du Transilien R", image: "lineR_01" }
-];
+]);

@@ -1,60 +1,65 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
 @import url(https://fonts.googleapis.com/css?family=Spinnaker);
 
+:root {
+    --medal-size: 48px;
+    --margin: 8px;
+}
+
 body {
-	width: 320px;
-	overflow-x: hidden;
-	font-size: 1em;
-	background: #fbfbfb;
+    background: #fbfbfb;
+    font-size: 1em;
+    overflow-x: hidden;
+    width: 320px;
 }
 
 div#not-logged, div#logged, div#medal-list {
-	display: none;
-	position: relative;
-	font-family: Spinnaker;
-	margin-top: 8px;
-	font-size: 1.2em;
-	line-height: 133%;
+    display: none;
+    font-family: Spinnaker, sans-serif;
+    font-size: 1.2em;
+    line-height: 133%;
+    margin-top: var(--margin);
+    position: relative;
 }
 
 a {
-	position: absolute;
+    position: absolute;
 }
 
 a#all-medals {
-	right: -2px;
-	bottom: -8px;
+    bottom: calc(-1 * var(--margin));
+    right: -2px;
 }
 
 img.medal-link {
-	width: 48px;
-	height: 48px;
+    height: var(--medal-size);
+    width: var(--medal-size);
 }
 
 span#medal-name {
-	float: left;
-	font-family: Montserrat;
-	font-size: 1.3em;
-	text-transform: uppercase;
-	width: 264px;
-	line-height: 110%;
+    float: left;
+    font-family: Montserrat, sans-serif;
+    font-size: 1.3em;
+    line-height: 110%;
+    text-transform: uppercase;
+    width: 264px;
 }
 
 img#picto {
-	float: left;
-	width: 48px;
-	height: 48px;
-	margin-right: 8px;
-	margin-bottom:	8px;
+    float: left;
+    height: var(--medal-size);
+    margin-bottom: var(--margin);
+    margin-right: var(--margin);
+    width: var(--medal-size);
 }
-		
+
 div.spacer {
-	clear: both;
-	border-bottom: 1px dashed #ccc;
+    border-bottom: 1px dashed #ccc;
+    clear: both;
 }
 
 div.poi-count {
-	margin-top: 8px;
-	margin-left: 2px;
-	line-height: 140%;
+    line-height: 140%;
+    margin-left: 2px;
+    margin-top: var(--margin);
 }
