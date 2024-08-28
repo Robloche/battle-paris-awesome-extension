@@ -1,3 +1,9 @@
+const getCurrentTabId = async () => {
+    // `tab` will either be a `tabs.Tab` instance or `undefined`.
+    const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
+    return tab?.id ?? null;
+};
+
 var battleParisEnhancer = {
 
     linkPerRow: 10,
@@ -11,11 +17,11 @@ var battleParisEnhancer = {
         chrome.tabs.query({
             active: true,
             lastFocusedWindow: true
-        }, function (tabs) {
+        }, async function (tabs) {
             var url = tabs[0].url;
             if (url.indexOf('battle.paris/medal/') > -1 || url.indexOf('battleparis.com/medal/') > -1) {
                 // Medal page
-                obj.checkLoggedUser();
+                await obj.checkLoggedUser();
             } else {
                 // Not a medal page: display links to all medals
                 obj.displayAllMedals();
@@ -87,9 +93,13 @@ var battleParisEnhancer = {
         });
     },
 
-    checkLoggedUser: function () {
-        // Call the injected script
-        chrome.scripting.executeScript({files: ['jquery-2.1.3.min.js', 'poi-count.js'],});
+    checkLoggedUser: async function () {
+        const tabId = await getCurrentTabId();
+
+        chrome.scripting.executeScript({
+            files: ['jquery-2.1.3.min.js', 'poi-count.js'],
+            target: {tabId},
+        });
     },
 
     updatePopup: function (e) {
