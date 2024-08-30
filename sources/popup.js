@@ -4,6 +4,25 @@ const getCurrentTabId = async () => {
     return tab?.id ?? null;
 };
 
+const show = (...elementSelectors) => {
+    elementSelectors.forEach((selector) => {
+        const elt = document.querySelector(selector);
+        elt.classList.remove('hidden');
+    });
+};
+
+const hide = (...elementSelectors) => {
+    elementSelectors.forEach((selector) => {
+        const elt = document.querySelector(selector);
+        console.log({selector, elt});
+        elt.classList.add('hidden');
+    });
+};
+
+const setText = (elementSelector, text) => {
+    document.querySelector(elementSelector).innerHTML = text;
+};
+
 const Settings = Object.freeze({
     allMedalsSize: 13,
     imageSize: 48,
@@ -34,26 +53,28 @@ const battleParisEnhancer = {
     },
 
     displayAllMedals: function () {
-        $('body').width(Settings.popupWidth).height(Settings.popupHeight);
+        const bodyElt = document.querySelector('body');
+        bodyElt.style.height = `${Settings.popupHeight}px`;
+        bodyElt.style.width = `${Settings.popupWidth}px`;
 
-        const medalsDiv = $('#medal-list');
+        const medalsElt = document.querySelector('#medal-list');
         let c = 0;
         let x = 0;
         let y = 0;
 
-        $(Rewards).each(function () {
-            $('<img />')
-                .attr({
-                    src: 'https://battle.paris/static/Rewards/' + this.image + '.png',
-                    title: decodeURI(this.name)
-                })
-                .addClass('medal-link')
-                .appendTo($('<a />').attr({
-                    href: 'https://battle.paris/medal/' + this.name + '/'
-                })
-                    .css('left', x)
-                    .css('top', y)
-                    .appendTo(medalsDiv));
+        Rewards.forEach(({image, name}) => {
+            const aElt = document.createElement('a');
+            aElt.href = `https://battle.paris/medal/${name}/`;
+            aElt.classList.add('medal-link', 'bouncy');
+            aElt.style.left = `${x}px`;
+            aElt.style.top = `${y}px`;
+
+            const imgElt = document.createElement('img');
+            imgElt.src = `https://battle.paris/static/Rewards/${image}.png`;
+            imgElt.title = decodeURI(name);
+
+            aElt.append(imgElt);
+            medalsElt.append(aElt);
 
             x += Settings.imageSize + Settings.spacing;
             if (++c % Settings.linkPerRow === 0) {
@@ -62,37 +83,21 @@ const battleParisEnhancer = {
             }
         });
 
-        $('#logged').hide();
-        medalsDiv.show();
-
-        // Bouncing effect on medals
-        $('.medal-link').hover(
-            function () {
-                const size = Settings.imageSize + Settings.zoom;
-                $(this).stop(false, true).animate({
-                    'width': size,
-                    'height': size,
-                    'margin': -Settings.zoom / 2
-                }, {duration: 200});
-            },
-            function () {
-                $(this).stop(false, true).animate({
-                    'width': Settings.imageSize,
-                    'height': Settings.imageSize,
-                    'margin': 0
-                }, {duration: 300});
-            }
-        );
+        hide('#logged');
+        show('#medal-list');
 
         // "Manual" links
-        $('body').on('click', 'a:not(#all-medals)', function (e) {
-            if (e.ctrlKey) {
-                chrome.tabs.create({url: $(this).attr('href')});
-                return false;
-            } else {
-                chrome.tabs.update({url: $(this).attr('href')});
-                window.close();
-            }
+        document.querySelectorAll('a.medal-link').forEach((aElt) => {
+            aElt.addEventListener('click', (e) => {
+                const {href: url} = aElt;
+                if (e.ctrlKey) {
+                    chrome.tabs.create({url});
+                    return false;
+                } else {
+                    chrome.tabs.update({url});
+                    window.close();
+                }
+            });
         });
     },
 
@@ -108,53 +113,51 @@ const battleParisEnhancer = {
     updatePopup: function (e) {
         if (!e.logged) {
             // Display "not logged" message
-            $('#not-logged').text(chrome.i18n.getMessage('notLogged')).show();
+            setText('#not-logged', chrome.i18n.getMessage('notLogged'));
+            show('#not-logged');
             return;
         }
 
         // Display medal details
-        $('#logged').show();
-        $('#checked-poi-label').text(chrome.i18n.getMessage('checkedPoi'));
-        $('#left-poi-label').text(chrome.i18n.getMessage(e.left > 1 ? 'leftPois' : 'leftPoi'));
-        $('#total-checked-label').text(chrome.i18n.getMessage('totalChecked'));
-        $('#checked-poi').text(e.checked);
-        $('#total-poi').text(e.checked + e.left);
-        $('#left-poi').text(e.left);
-        $('#total-checked').text(e.total);
-        $('#picto').attr('src', e.picto);
-        $('#medal-name').text(e.name);
+        show('#logged');
+        setText('#checked-poi-label', chrome.i18n.getMessage('checkedPoi'));
+        setText('#left-poi-label', chrome.i18n.getMessage(e.left > 1 ? 'leftPois' : 'leftPoi'));
+        setText('#total-checked-label', chrome.i18n.getMessage('totalChecked'));
+        setText('#checked-poi', e.checked);
+        setText('#total-poi', e.checked + e.left);
+        setText('#left-poi', e.left);
+        setText('#total-checked', e.total);
+        setText('#medal-name', e.name);
+        document.querySelector('#picto').src = e.picto;
 
         // Bouncing effect on "all-medals" link
         const obj = this;
-        $('#all-medals img').hover(
-            function () {
-                const size = Settings.allMedalsSize + 6;
-                $(this).stop(false, true).animate({width: size, height: size, margin: -3}, {duration: 200});
-            },
-            function () {
-                $(this).stop(false, true).animate({
-                    width: Settings.allMedalsSize,
-                    height: Settings.allMedalsSize,
-                    margin: 0
-                }, {duration: 300});
-            }
-        );
 
         // Handle click on link
-        $('#all-medals').on('click', function () {
-            obj.displayAllMedals();
+        document.querySelector('#all-medals').addEventListener('click', () => {
+            this.displayAllMedals()
         });
     }
 };
 
-$(function () {
+const appReady = new Promise((resolve) => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', resolve);
+    } else {
+        resolve();
+    }
+});
+
+const initialize = () => {
     // Listen to the injected script
     chrome.runtime.onMessage.addListener(function (e, sender) {
         battleParisEnhancer.updatePopup(e);
     });
 
     // Reset DIVs visibility
-    $('#not-logged, #logged, #medal-list').hide();
+    hide('#not-logged', '#logged', '#medal-list');
 
     battleParisEnhancer.checkPage();
-});
+};
+
+appReady.then(initialize);
