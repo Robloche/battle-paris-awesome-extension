@@ -1,40 +1,14 @@
-const getCurrentTabId = async () => {
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
-    return tab?.id ?? null;
-};
-
-const show = (...elementSelectors) => {
-    elementSelectors.forEach((selector) => {
-        const elt = document.querySelector(selector);
-        elt.classList.remove('hidden');
-    });
-};
-
-const hide = (...elementSelectors) => {
-    elementSelectors.forEach((selector) => {
-        const elt = document.querySelector(selector);
-        elt.classList.add('hidden');
-    });
-};
-
-const setText = (elementSelector, text) => {
-    document.querySelector(elementSelector).innerHTML = text;
-};
-
 const Settings = Object.freeze({
-    allMedalsSize: 13,
     imageSize: 48,
     linkPerRow: 10,
     popupHeight: 488,
     popupWidth: 624,
     spacing: 16,
-    zoom: 10,
 });
 
-const battleParisEnhancer = {
+class BattleParisEnhancer {
 
-    checkPage: function () {
+    checkPage() {
         const obj = this;
         chrome.tabs.query({
             active: true,
@@ -49,9 +23,9 @@ const battleParisEnhancer = {
                 obj.displayAllMedals();
             }
         });
-    },
+    }
 
-    displayAllMedals: function () {
+    displayAllMedals() {
         const bodyElt = document.querySelector('body');
         bodyElt.style.height = `${Settings.popupHeight}px`;
         bodyElt.style.width = `${Settings.popupWidth}px`;
@@ -98,18 +72,18 @@ const battleParisEnhancer = {
                 }
             });
         });
-    },
+    }
 
-    checkLoggedUser: async function () {
+    async checkLoggedUser() {
         const tabId = await getCurrentTabId();
 
         chrome.scripting.executeScript({
             files: ['poi-count.js'],
             target: {tabId},
         });
-    },
+    }
 
-    updatePopup: function (e) {
+    updatePopup(e) {
         if (!e.logged) {
             // Display "not logged" message
             setText('#not-logged', chrome.i18n.getMessage('notLogged'));
@@ -137,26 +111,18 @@ const battleParisEnhancer = {
             this.displayAllMedals()
         });
     }
-};
-
-const appReady = new Promise((resolve) => {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', resolve);
-    } else {
-        resolve();
-    }
-});
+}
 
 const initialize = () => {
+    const btp = new BattleParisEnhancer();
+
     // Listen to the injected script
-    chrome.runtime.onMessage.addListener(function (e, sender) {
-        battleParisEnhancer.updatePopup(e);
-    });
+    chrome.runtime.onMessage.addListener((e) => btp.updatePopup(e));
 
     // Reset DIVs visibility
     hide('#not-logged', '#logged', '#medal-list');
 
-    battleParisEnhancer.checkPage();
+    btp.checkPage();
 };
 
 appReady.then(initialize);
