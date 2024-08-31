@@ -1,5 +1,5 @@
 const msg = {
-    logged: $('#login').length === 0,
+    logged: document.querySelector('#login') === null,
     name: '',
     picto: null,
     total: 0,
@@ -7,37 +7,36 @@ const msg = {
     left: 0
 };
 
-const sortUnorderedList = (ul) => {
-    const lis = ul.children();
+const comparePois = (a, b) => {
+    if (a.counter !== b.counter) {
+        if (a.counter > 0 && b.counter > 0) {
+            return b.counter - a.counter;
+        } else {
+            return a.counter - b.counter;
+        }
+    } else {
+        return a.text.localeCompare(b.text);
+    }
+};
+
+const sortUnorderedList = (liElements) => {
     const vals = [];
 
     // Get all POIs
-    for (let i = 0, l = lis.length; i < l; ++i) {
-        const item = $(lis[i].innerHTML);
-
-        vals.push({
-            counter: parseInt(item.find('.place_counter').first().text(), 10),
-            text: item.find('.txt').first().text(),
-            innerHTML: lis[i].innerHTML
-        });
+    for (let i = 0, l = liElements.length; i < l; ++i) {
+        const elt = liElements[i];
+        const counter = parseInt(elt.querySelector('.place_counter').innerText, 10);
+        const text = elt.querySelector('.txt').innerText;
+        const {innerHTML} = elt;
+        vals.push({counter, text, innerHTML});
     }
 
     // Sort POIs
-    vals.sort((a, b) => {
-        if (a.counter !== b.counter) {
-            if (a.counter > 0 && b.counter > 0) {
-                return b.counter - a.counter;
-            } else {
-                return a.counter - b.counter;
-            }
-        } else {
-            return a.text.localeCompare(b.text);
-        }
-    });
+    vals.sort(comparePois);
 
     // Display ordered POIs
-    for (let i = 0, l = lis.length; i < l; ++i) {
-        lis[i].innerHTML = vals[i].innerHTML;
+    for (let i = 0, l = liElements.length; i < l; ++i) {
+        liElements[i].innerHTML = vals[i].innerHTML;
     }
 }
 
@@ -45,25 +44,27 @@ if (msg.logged) {
     // User logged in
 
     // Sort POIs
-    sortUnorderedList($('.list.box').first().parent());
+    sortUnorderedList(document.querySelectorAll('.list.box'));
 
     // Unhighlight checked POIs
-    $('.place_counter').each(function () {
-        const c = parseInt($(this).text(), 10);
+    document.querySelectorAll('.place_counter').forEach((elt) => {
+        const c = parseInt(elt.innerText, 10);
         msg.total += c;
         if (c === 0) {
             msg.left++;
         } else {
-            $(this).parents('.list.box')
-                .css('background-color', '#c7c7c7')
-                .css('box-shadow', 'none');
+            const liParent = elt.closest('.list.box');
+            if (liParent) {
+                liParent.style.backgroundColor = '#c7c7c7';
+                liParent.style.boxShadow = 'none';
+            }
             msg.checked++;
         }
     });
 
-    msg.name = $('.menupad > .t6').first().text();
-
-    msg.picto = 'https://battle.paris' + $('.medal_big > img').attr('src');
+    msg.name = document.querySelector('.menupad > .t6').innerText;
+    const {src} = document.querySelector('.medal_big > img');
+    msg.picto = `${src.startsWith('/') ? 'https://battle.paris' : ''}${src}`;
 }
 
 chrome.runtime.sendMessage(msg);

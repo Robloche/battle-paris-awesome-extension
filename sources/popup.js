@@ -14,7 +14,6 @@ const show = (...elementSelectors) => {
 const hide = (...elementSelectors) => {
     elementSelectors.forEach((selector) => {
         const elt = document.querySelector(selector);
-        console.log({selector, elt});
         elt.classList.add('hidden');
     });
 };
@@ -105,7 +104,7 @@ const battleParisEnhancer = {
         const tabId = await getCurrentTabId();
 
         chrome.scripting.executeScript({
-            files: ['jquery-2.1.3.min.js', 'poi-count.js'],
+            files: ['poi-count.js'],
             target: {tabId},
         });
     },
