@@ -1,7 +1,7 @@
-const getCurrentTabId = async () => {
+const getCurrentTab = async () => {
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
     const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
-    return tab?.id ?? null;
+    return tab ?? null;
 };
 
 const show = (...elementSelectors) => {

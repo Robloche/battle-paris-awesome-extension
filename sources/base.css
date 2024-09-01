@@ -10,14 +10,14 @@ body {
     background: #fbfbfb;
     font-size: 1em;
     overflow-x: hidden;
-    width: 320px;
+    width: 400px;
 }
 
 .hidden {
     display: none;
 }
 
-div#not-logged, div#logged, div#medal-list {
+.container {
     font-family: Spinnaker, sans-serif;
     font-size: 1.2em;
     line-height: 133%;
@@ -25,12 +25,15 @@ div#not-logged, div#logged, div#medal-list {
     position: relative;
 }
 
-a {
-    position: absolute;
+#medal-list {
+    display: flex;
+    flex-wrap: wrap;
+    grid-gap: var(--margin);
 }
 
 a#all-medals {
     bottom: calc(-1 * var(--margin));
+    position: absolute;
     right: -2px;
 }
 

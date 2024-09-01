@@ -1,28 +1,25 @@
 const Settings = Object.freeze({
-    imageSize: 48,
-    linkPerRow: 10,
     popupHeight: 488,
     popupWidth: 624,
-    spacing: 16,
 });
 
 class BattleParisEnhancer {
 
-    checkPage() {
-        const obj = this;
-        chrome.tabs.query({
-            active: true,
-            lastFocusedWindow: true
-        }, async (tabs) => {
-            const [{url}] = tabs;
-            if (url.indexOf('battle.paris/medal/') > -1 || url.indexOf('battleparis.com/medal/') > -1) {
-                // Medal page
-                await obj.checkLoggedUser();
-            } else {
-                // Not a medal page: display links to all medals
-                obj.displayAllMedals();
-            }
-        });
+    async checkPage() {
+        const tab = await getCurrentTab();
+        if (!tab) {
+            return;
+        }
+
+        const {url} = tab;
+
+        if (url.indexOf('battle.paris/medal/') > -1 || url.indexOf('battleparis.com/medal/') > -1) {
+            // Medal page
+            await this.runContentScript();
+        } else {
+            // Not a medal page: display links to each and every medal
+            this.displayAllMedals();
+        }
     }
 
     displayAllMedals() {
@@ -31,16 +28,11 @@ class BattleParisEnhancer {
         bodyElt.style.width = `${Settings.popupWidth}px`;
 
         const medalsElt = document.querySelector('#medal-list');
-        let c = 0;
-        let x = 0;
-        let y = 0;
 
         Rewards.forEach(({image, name}) => {
             const aElt = document.createElement('a');
             aElt.href = `https://battle.paris/medal/${name}/`;
             aElt.classList.add('medal-link', 'bouncy');
-            aElt.style.left = `${x}px`;
-            aElt.style.top = `${y}px`;
 
             const imgElt = document.createElement('img');
             imgElt.src = `https://battle.paris/static/Rewards/${image}.png`;
@@ -48,12 +40,6 @@ class BattleParisEnhancer {
 
             aElt.append(imgElt);
             medalsElt.append(aElt);
-
-            x += Settings.imageSize + Settings.spacing;
-            if (++c % Settings.linkPerRow === 0) {
-                x = 0;
-                y += Settings.imageSize + Settings.spacing;
-            }
         });
 
         hide('#logged');
@@ -74,55 +60,82 @@ class BattleParisEnhancer {
         });
     }
 
-    async checkLoggedUser() {
-        const tabId = await getCurrentTabId();
+    async runContentScriptInternal(tabId) {
+        this.updatePopup(await chrome.tabs.sendMessage(tabId, {type: 'process'}));
+    }
 
-        chrome.scripting.executeScript({
-            files: ['poi-count.js'],
-            target: {tabId},
-        });
+    async runContentScript() {
+        const tab = await getCurrentTab();
+        if (!tab) {
+            return;
+        }
+
+        const {id: tabId} = tab;
+
+        try {
+            await this.runContentScriptInternal(tabId);
+        } catch (error) {
+            // No response: content script not loaded yet
+            await chrome.scripting.executeScript({
+                files: ['poi-count.js'],
+                target: {tabId},
+            });
+
+            await this.runContentScriptInternal(tabId);
+        }
     }
 
     updatePopup(e) {
-        if (!e.logged) {
+        if (!e) {
+            // No response: something bad happened
+            return;
+        }
+
+        const {checked, left, logged, name, picto, status, total} = e;
+
+        if (status === 'not_logged') {
             // Display "not logged" message
             setText('#not-logged', chrome.i18n.getMessage('notLogged'));
             show('#not-logged');
             return;
         }
 
+        if (status !== 'processed') {
+            // Unexpected status
+            console.error(`Error: unexpected status "${status}"`);
+            return;
+        }
+
         // Display medal details
         show('#logged');
         setText('#checked-poi-label', chrome.i18n.getMessage('checkedPoi'));
-        setText('#left-poi-label', chrome.i18n.getMessage(e.left > 1 ? 'leftPois' : 'leftPoi'));
+        setText('#left-poi-label', chrome.i18n.getMessage(left > 1 ? 'leftPois' : 'leftPoi'));
         setText('#total-checked-label', chrome.i18n.getMessage('totalChecked'));
-        setText('#checked-poi', e.checked);
-        setText('#total-poi', e.checked + e.left);
-        setText('#left-poi', e.left);
-        setText('#total-checked', e.total);
-        setText('#medal-name', e.name);
-        document.querySelector('#picto').src = e.picto;
-
-        // Bouncing effect on "all-medals" link
-        const obj = this;
+        setText('#checked-poi', checked);
+        setText('#total-poi', checked + left);
+        setText('#left-poi', left);
+        setText('#total-checked', total);
+        setText('#medal-name', name);
+        document.querySelector('#picto').src = picto;
 
         // Handle click on link
         document.querySelector('#all-medals').addEventListener('click', () => {
+            console.log(`all medals link clicked`);
             this.displayAllMedals()
         });
     }
 }
 
-const initialize = () => {
+const initialize = async () => {
     const btp = new BattleParisEnhancer();
 
     // Listen to the injected script
     chrome.runtime.onMessage.addListener((e) => btp.updatePopup(e));
 
     // Reset DIVs visibility
-    hide('#not-logged', '#logged', '#medal-list');
+    //hide('#not-logged', '#logged', '#medal-list');
 
-    btp.checkPage();
+    await btp.checkPage();
 };
 
 appReady.then(initialize);
